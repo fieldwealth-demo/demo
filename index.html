@@ -26,21 +26,54 @@
 <script src="proto/vendor/topojson-client.min.js"></script>
 <script src="proto/vendor/highcharts.js"></script>
 <script src="proto/vendor/highcharts-more.js"></script>
-<script src="proto/app-ui.r133.js"></script>
-<script src="proto/field-data.js"></script>
-<script src="proto/app-data-views.r133.js"></script>
-<script src="proto/app-firm.r133.js"></script>
-<script src="proto/app-ops.r133.js"></script>
+<script>
+  /* Loads the app scripts in order, then mounts. The internal-ops seat is Morgan Ellis at Alpine
+     Partners: these swaps update the r133 files in place until the next full build is uploaded. */
+  (function () {
+    var SWAPS = [
+      ["name: 'Kyung Min',\n  role: 'Internal ops',\n  org: 'Field',\n  email: 'kyung@fieldwealth.ai',\n  init: 'KM',",
+       "name: 'Morgan Ellis',\n  role: 'Internal ops',\n  org: 'Alpine Partners',\n  email: 'morgan.ellis@alpinepartners.com',\n  init: 'ME',"],
+      ['"fontSize":"22px","fontWeight":"600"}}, "KM")', '"fontSize":"22px","fontWeight":"600"}}, "ME")'],
+      ['Kyung Min (Super User)', 'Morgan Ellis (Super User)'],
+      ['kyung@fieldwealth.ai', 'morgan.ellis@alpinepartners.com'],
+      ['Internal ops · Field', 'Internal ops · Alpine Partners'],
+      ['Kyung Min', 'Morgan Ellis'],
+      ['Kyung Asset test', 'Sandbox Asset test'],
+      ['Kyung Tenant', 'Sandbox Tenant'],
+      ['Kyung Household', 'Sandbox Household']
+    ];
+    var FILES = [['proto/app-ui.r133.js', 1], ['proto/field-data.js', 0], ['proto/app-data-views.r133.js', 1], ['proto/app-firm.r133.js', 0], ['proto/app-ops.r133.js', 1]];
+    function run(i) {
+      if (i >= FILES.length) {
+        (function go() {
+          var el = document.getElementById('root');
+          if (el && window.__protoMount) window.__protoMount(el);
+          else setTimeout(go, 50);
+        })();
+        return;
+      }
+      var url = FILES[i][0], swap = FILES[i][1];
+      if (!swap) {
+        var s = document.createElement('script');
+        s.src = url;
+        s.onload = function () { run(i + 1); };
+        document.head.appendChild(s);
+        return;
+      }
+      fetch(url).then(function (r) { return r.text(); }).then(function (t) {
+        SWAPS.forEach(function (p) { t = t.split(p[0]).join(p[1]); });
+        var s = document.createElement('script');
+        s.textContent = t + '\n//# sourceURL=' + url;
+        document.head.appendChild(s);
+        run(i + 1);
+      });
+    }
+    run(0);
+  })();
+</script>
 <style>body{margin:0}</style>
 </head>
 <body>
 <div id="root" style="min-height:100vh"></div>
-<script>
-  (function go() {
-    var el = document.getElementById('root');
-    if (window.__protoMount) window.__protoMount(el);
-    else setTimeout(go, 50);
-  })();
-</script>
 </body>
 </html>
